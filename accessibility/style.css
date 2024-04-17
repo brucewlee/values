@@ -1,0 +1,79 @@
+body {
+    font-family: 'Garamond', serif;
+    text-align: center;
+    padding: 20px;
+    margin: 0;
+}
+select, button{
+    cursor: pointer;
+    margin: 10px 10px;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    text-decoration: none;
+}
+
+.button {
+    cursor: pointer;
+    margin: 10px 10px;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    text-decoration: none;
+}
+
+.rightbutton {
+    float: right;
+}
+
+.section {
+    display: none; /* Initially hide all sections */
+}
+.datasetviewer {
+    font-family: 'Garamond', serif;
+    text-align: left;
+    padding: 20px;
+    margin: 0;
+}
+.visible {
+    display: block; /* Show section when active */
+}
+img {
+    max-width: 30%;
+    height: auto;
+    margin: 20px 0;
+}
+.navigation {
+    padding: 10px;
+    background-color: #f8f8f8;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-top: 20px;
+}
+#entry {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-top: 20px;
+}
+
+#progress-bar {
+    height: 20px;
+    background-color: #4CAF50;
+    text-align: center;
+    line-height: 20px;
+    color: white;
+    border-radius: 5px;
+    width: 0%; /* Initial width */
+}
+
+.progress-container {
+    width: 100%;
+    background-color: #e0e0e0;
+    border-radius: 5px;
+    margin: 20px 0;
+}

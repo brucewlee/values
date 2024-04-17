@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Integrated SPA with Main Findings</title>
+    <style>
+
+        body {
+            font-family: 'Garamond', serif;
+            text-align: center;
+            padding: 20px;
+            margin: 0;
+        }
+        select, button{
+            cursor: pointer;
+            margin: 10px 10px;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            background-color: #fff;
+            text-decoration: none;
+        }
+
+        .button {
+            cursor: pointer;
+            margin: 10px 10px;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            background-color: #fff;
+            text-decoration: none;
+        }
+
+        .rightbutton {
+            float: right;
+        }
+        
+        .section {
+            display: none; /* Initially hide all sections */
+        }
+        .datasetviewer {
+            font-family: 'Garamond', serif;
+            text-align: left;
+            padding: 20px;
+            margin: 0;
+        }
+        .visible {
+            display: block; /* Show section when active */
+        }
+        img {
+            max-width: 30%;
+            height: auto;
+            margin: 20px 0;
+        }
+        .navigation {
+            padding: 10px;
+            background-color: #f8f8f8;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+        #entry {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+
+        #progress-bar {
+            height: 20px;
+            background-color: #4CAF50;
+            text-align: center;
+            line-height: 20px;
+            color: white;
+            border-radius: 5px;
+            width: 0%; /* Initial width */
+        }
+
+        .progress-container {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Main Navigator Section -->
+    <div id="mainNavigator" class="section visible">
+        <h1>VALUES</h1>
+        <h2>Role-playing Discovers Latent Moral Beliefs</h2>
+        <h3>Bruce W. Lee, Yeongheon Lee</h3>
+        <p><a href="#"><img src="img/death-of-socrates.jpg" alt="The Death of Socrates"></a></p>
+        <hr>
+        <h3>Web Viewers for Accessibility</h3>
+        <button class="button" onclick="switchSection('datasetViewer')">View Dataset</button>
+        <button class="button" onclick="switchSection('mainFindings')">Main Findings</button>
+    </div>
+
+    <!-- Dataset Viewer Section -->
+    <div id="datasetViewer" class="section datasetviewer">
+        <select id="datasetSelector" onchange="loadSelectedDataSet()">
+            <!-- Options will be populated by JavaScript -->
+        </select>
+        <div class="navigation"></div>
+        <div class="progress-container">
+            <div id="progress-bar" style="width: 0%;"></div>
+        </div>
+        <div id="progress-text"></div>
+        <div id="entry"></div>
+    </div>
+
+    <!-- Main Findings Section -->
+    <div id="mainFindings" class="section">
+        <h1>Main Findings</h1>
+        <p>This is a dummy section for Main Findings. Here you can display the results of your analysis or insights derived from the dataset.</p>
+        <button class="button" onclick="switchSection('mainNavigator')">Back to Main</button>
+    </div>
+
+    <script src="data.js"></script>
+    <script>
+        let currentDataSet = [];
+        let currentIndex = 0;
+        let selectedKey;
+
+        // Function to switch between sections
+        function switchSection(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('visible');
+            });
+            document.getElementById(sectionId).classList.add('visible');
+        }
+
+        
+        function populateDataSetSelector() {
+            const selector = document.getElementById('datasetSelector');
+            for (const key in dataSets) {
+                const option = document.createElement('option');
+                option.value = key;
+                option.textContent = key;
+                selector.appendChild(option);
+            }
+        }
+
+        function loadSelectedDataSet() {
+            const selector = document.getElementById('datasetSelector');
+            selectedKey = selector.value;
+            currentDataSet = dataSets[selectedKey];
+            currentIndex = 0;
+            displayEntry();
+        }
+
+        function displayEntry() {
+            if (currentDataSet.length === 0 || currentIndex < 0 || currentIndex >= currentDataSet.length) {
+                document.getElementById('entry').innerHTML = "<p>No entry to display.</p>";
+                document.getElementById('progress-bar').style.width = '0%';
+                document.getElementById('progress-text').innerText = '';
+                return;
+            }
+            const entry = currentDataSet[currentIndex];
+            const prompt = entry.Prompt.replace(/\n/g, "<br>");
+            const response = entry.Response.replace(/\n/g, "<br>");
+            const questionIndex = entry.Question_idx; // Or any identifier used for navigation
+
+            // Assuming 'run_50_1_gpt-3.5-turbo-1106' is derived from 'Question_idx' or similar
+            const terminalOutputUrl = `../runs/${selectedKey}/ask_question_terminal.html`;
+
+            document.getElementById('entry').innerHTML = `
+                <h2>Entry ${currentIndex + 1}</h2>
+                <p><strong>Prompt:</strong> ${prompt}</p>
+                <p><strong>Question Index:</strong> ${questionIndex}</p>
+                <p><strong>Persona Index:</strong> ${entry.Persona_idx}</p>
+                <p><strong>Response:</strong> ${response}</p>
+                <p><strong>Response Parsed:</strong> ${entry.Response_Parsed}</p>
+            `;
+
+            // Update the navigation div to include the new button
+            document.querySelector('.navigation').innerHTML = `
+                <button onclick="navigate(-1)"><<<-Previous</button>
+                <button onclick="navigate(1)">Next->>></button>
+                <button class="button rightbutton" onclick="switchSection('mainNavigator')">Back to Main</button>
+                <button class="button rightbutton" onclick="location.href='https://htmlpreview.github.io/?https://github.com/brucewlee/values/blob/main/runs/${selectedKey}/ask_question_terminal.html'">View Terminal Output for This Run</button>
+            `;
+
+            // Update progress bar and text
+            const progressPercentage = ((currentIndex + 1) / currentDataSet.length) * 100;
+            document.getElementById('progress-bar').style.width = `${progressPercentage}%`;
+            document.getElementById('progress-text').innerText = `Entry ${currentIndex + 1} of ${currentDataSet.length}`;
+        }
+
+
+        function navigate(direction) {
+            currentIndex += direction;
+            if (currentIndex < 0) currentIndex = 0;
+            if (currentIndex >= currentDataSet.length) currentIndex = currentDataSet.length - 1;
+            displayEntry();
+        }
+
+        populateDataSetSelector();
+        loadSelectedDataSet();
+    </script>
+</body>
+</html>

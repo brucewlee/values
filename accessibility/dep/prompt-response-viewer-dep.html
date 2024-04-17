@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Dataset Viewer</title>
+<style>
+body {
+    font-family: 'Garamond', serif;
+    text-align: left;
+    padding: 20px;
+    margin: 0;
+}
+
+select, button{
+    cursor: pointer;
+    margin: 10px 10px;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    text-decoration: none;
+}
+
+.button {
+    cursor: pointer;
+    margin: 10px 10px;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    text-decoration: none;
+    float: right;
+}
+
+#entry {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-top: 20px;
+}
+.navigation {
+    margin-top: 20px;
+    padding: 10px;
+    background-color: #f8f8f8; /* Light grey background */
+    border: 1px solid #ccc; /* Subtle border */
+    border-radius: 5px; /* Rounded corners */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Soft shadow for depth */
+}
+.progress-container {
+    width: 100%;
+    background-color: #e0e0e0;
+    border-radius: 5px;
+    margin: 20px 0;
+}
+
+#progress-bar {
+    height: 20px;
+    background-color: #4CAF50;
+    text-align: center;
+    line-height: 20px;
+    color: white;
+    border-radius: 5px;
+    width: 0%; /* Initial width */
+}
+</style>
+</head>
+<body>
+
+<select id="datasetSelector" onchange="loadSelectedDataSet()">
+    <!-- Options will be populated by JavaScript -->
+</select>
+
+<div class="navigation">
+</div>
+
+<div class="progress-container">
+    <div id="progress-bar" style="width: 0%;"></div>
+</div>
+<div id="progress-text"></div>
+
+<div id="entry"></div>
+
+<script src="data.js"></script>
+<script>
+let currentDataSet = [];
+let currentIndex = 0;
+let selectedKey;
+
+function populateDataSetSelector() {
+    const selector = document.getElementById('datasetSelector');
+    for (const key in dataSets) {
+        const option = document.createElement('option');
+        option.value = key;
+        option.textContent = key;
+        selector.appendChild(option);
+    }
+}
+
+function loadSelectedDataSet() {
+    const selector = document.getElementById('datasetSelector');
+    selectedKey = selector.value;
+    currentDataSet = dataSets[selectedKey];
+    currentIndex = 0;
+    displayEntry();
+}
+
+function displayEntry() {
+    if (currentDataSet.length === 0 || currentIndex < 0 || currentIndex >= currentDataSet.length) {
+        document.getElementById('entry').innerHTML = "<p>No entry to display.</p>";
+        document.getElementById('progress-bar').style.width = '0%';
+        document.getElementById('progress-text').innerText = '';
+        return;
+    }
+    const entry = currentDataSet[currentIndex];
+    const prompt = entry.Prompt.replace(/\n/g, "<br>");
+    const response = entry.Response.replace(/\n/g, "<br>");
+    const questionIndex = entry.Question_idx; // Or any identifier used for navigation
+
+    // Assuming 'run_50_1_gpt-3.5-turbo-1106' is derived from 'Question_idx' or similar
+    const terminalOutputUrl = `../runs/${selectedKey}/ask_question_terminal.html`;
+
+    document.getElementById('entry').innerHTML = `
+        <h2>Entry ${currentIndex + 1}</h2>
+        <p><strong>Prompt:</strong> ${prompt}</p>
+        <p><strong>Question Index:</strong> ${questionIndex}</p>
+        <p><strong>Persona Index:</strong> ${entry.Persona_idx}</p>
+        <p><strong>Response:</strong> ${response}</p>
+        <p><strong>Response Parsed:</strong> ${entry.Response_Parsed}</p>
+    `;
+
+    // Update the navigation div to include the new button
+    document.querySelector('.navigation').innerHTML = `
+        <button onclick="navigate(-1)"><<<-Previous</button>
+        <button onclick="navigate(1)">Next->>></button>
+        <a href="index.html" class="button">Back to Main Page</a>
+        <a href="${terminalOutputUrl}" class="button">View Terminal Output</a> <!-- New Button -->
+    `;
+
+    // Update progress bar and text
+    const progressPercentage = ((currentIndex + 1) / currentDataSet.length) * 100;
+    document.getElementById('progress-bar').style.width = `${progressPercentage}%`;
+    document.getElementById('progress-text').innerText = `Entry ${currentIndex + 1} of ${currentDataSet.length}`;
+}
+
+
+function navigate(direction) {
+    currentIndex += direction;
+    if (currentIndex < 0) currentIndex = 0;
+    if (currentIndex >= currentDataSet.length) currentIndex = currentDataSet.length - 1;
+    displayEntry();
+}
+
+populateDataSetSelector();
+loadSelectedDataSet();
+</script>
+
+</body>
+</html>

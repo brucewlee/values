@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://cdn.plot.ly/plotly-2.30.1.min.js" charset="utf-8"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discovering Latent Human Values: LLMs Show Consistent Value Bias During Role-play</title>
+    <style>
+
+        body {
+            font-family: 'Garamond', serif;
+            text-align: center;
+            padding: 20px;
+            margin: 0;
+        }
+        select, button{
+            cursor: pointer;
+            margin: 10px 10px;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            background-color: #fff;
+            text-decoration: none;
+        }
+        
+        .report-button {
+            width:25%;
+            float: center;
+            background-color: #4CAF50; /* Green background */
+            color: white; /* White text */
+            font-weight: bold; /* Make the font bold */
+            border: none; /* Remove border */
+        }
+
+        .button {
+            cursor: pointer;
+            margin: 10px 10px;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            background-color: #fff;
+            text-decoration: none;
+        }
+
+        .rightbutton {
+            float: right;
+        }
+        
+        .section {
+            display: none; /* Initially hide all sections */
+        }
+        .datasetviewer {
+            font-family: 'Garamond', serif;
+            text-align: left;
+            padding: 20px;
+            margin: 0;
+        }
+        .visible {
+            display: block; /* Show section when active */
+        }
+        img {
+            max-width: 30%;
+            height: auto;
+            margin: 20px 0;
+        }
+        .navigation {
+            padding: 10px;
+            background-color: #f8f8f8;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+        #entry {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+
+        #progress-bar {
+            height: 20px;
+            background-color: #4CAF50;
+            text-align: center;
+            line-height: 20px;
+            color: white;
+            border-radius: 5px;
+            width: 0%; /* Initial width */
+        }
+
+        .progress-container {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+
+        #questionBox {
+            cursor: move;
+            display: none;
+            text-align: left;
+            position: fixed; /* Fixed position so it stays visible while scrolling */
+            top: 20px; /* Space from the top */
+            right: 20px; /* Space from the right edge of the viewport */
+            width: 250px; /* Set a specific width */
+            max-height: 70%; /* Set a maximum height */
+            padding: 15px; /* Padding inside the box */
+            background-color: #f8f8f8; /* Background color */
+            border: 1px solid #ccc; /* Border around the box */
+            border-radius: 5px; /* Rounded corners */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Subtle shadow */
+            overflow-y: scroll; /* Enable vertical scrolling */
+            z-index: 1000; /* Make sure it floats above other content */
+            font-size: 14px; /* Smaller font size for readability */
+            color: #333; /* Font color */
+        }
+
+    </style>
+</head>
+<body>
+    <select id="datasetSelector" class="section" onchange="loadSelectedDataSet()">
+        <!-- Options will be populated by JavaScript -->
+    </select>
+    <!-- Main Navigator Section -->
+    <div id="mainNavigator" class="section visible">
+        <h1>Do Machines Have Values?</h1>
+        <h2>Language Models Show Consistent Value Bias During Role-Play</h2>
+        <h4>In Progress</h4>
+        <!-- <p><a href="#"><img src="accessibility/img/death-of-socrates.jpg" alt="The Death of Socrates"></a></p>-->
+        <hr>
+        <button class="button" onclick="switchSection('mainFindings')">Summary of Main Findings</button>
+        <button class="button" onclick="switchSection('valueBias')">Eliciting Latent Values with Role-Play</button>
+        <button class="button" onclick="switchSection('datasetViewer')">View Raw Response Results</button>
+        <hr>
+    </div>
+    <div id="questionBox">
+        <button id="toggleQuestionBox" style="float: right;">Close</button>
+        <div id="questionContent">
+            <h3>Value Questionnaire</h3><br>
+            <!-- Question content will be added here -->
+        </div>
+    </div>
+    <!-- Dataset Viewer Section -->
+    <div id="datasetViewer" class="section datasetviewer">
+        <div class="navigation"></div>
+        <div class="progress-container">
+            <div id="progress-bar" style="width: 0%;"></div>
+        </div>
+        <div id="progress-text"></div>
+        <div id="entry"></div>
+    </div>
+
+    <div id="valueBias" class="section">
+        <h1>Eliciting Latent Values with Role-Play</h1>
+        <div>
+            <button class="button" onclick="updateCharts('anthropic.claude-3-sonnet-20240229-v1:0')">anthropic.claude-3-sonnet-20240229-v1:0</button>
+            <button class="button" onclick="updateCharts('command-r-plus')">command-r-plus</button>
+            <button class="button" onclick="updateCharts('gpt-3.5-turbo-0125')">gpt-3.5-turbo-0125</button>
+            <button class="button" onclick="switchSection('mainNavigator')"><b>Back to Main</b></button>
+        </div>
+        <div id="valueBiasChart"></div>
+    </div>
+
+    <!-- Main Findings Section -->
+    <div id="mainFindings" class="section">
+        <h1>Main Findings</h1>
+        <p>This is a dummy section for Main Findings. Here you can display the results of your analysis or insights derived from the dataset.</p>
+        <button class="button" onclick="switchSection('mainNavigator')">Back to Main</button>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <script src="accessibility/data.js"></script>
+    <script>
+        let currentDataSet = [];
+        let currentIndex = 0;
+        let selectedKey;
+
+        function updateCharts(modelKey) {
+            selectedKey = modelKey;
+            displayCharts();
+        }
+
+        // Function to switch between sections
+        function switchSection(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('visible');
+            });
+            document.getElementById(sectionId).classList.add('visible');
+            if (sectionId === 'datasetViewer') {
+                document.getElementById('datasetSelector').classList.add('visible');
+            }
+            if (sectionId === 'valueBias') {
+                loadValueBiasChart();
+                document.getElementById('questionBox').style.display = 'block'; // Show the question box
+            } else {
+                document.getElementById('questionBox').style.display = 'none'; // Hide the question box
+            }
+        }
+                
+        function populateDataSetSelector() {
+            const selector = document.getElementById('datasetSelector');
+            for (const key in dataSets) {
+                const option = document.createElement('option');
+                option.value = key;
+                option.textContent = key;
+                selector.appendChild(option);
+            }
+        }
+
+        function loadSelectedDataSet() {
+            const selector = document.getElementById('datasetSelector');
+            selectedKey = selector.value;
+            currentDataSet = dataSets[selectedKey];
+            currentIndex = 0;
+            displayEntry();
+        }
+
+        function displayEntry() {
+            if (currentDataSet.length === 0 || currentIndex < 0 || currentIndex >= currentDataSet.length) {
+                document.getElementById('entry').innerHTML = "<p>No entry to display.</p>";
+                document.getElementById('progress-bar').style.width = '0%';
+                document.getElementById('progress-text').innerText = '';
+                return;
+            }
+            const entry = currentDataSet[currentIndex];
+            const prompt = entry.prompt.replace(/\n/g, "<br>");
+            const response = entry.response.replace(/\n/g, "<br>");
+            const questionIndex = entry.question_number; 
+
+            const terminalOutputUrl = `runs/${selectedKey}/ask_question_terminal.html`;
+
+            document.getElementById('entry').innerHTML = `
+                <h2>Entry ${currentIndex + 1}</h2>
+                <p><strong>Prompt:</strong><br>${prompt}</p>
+                <p><strong>Response Parsed:</strong><br>${entry.response_parsed}</p>
+                <hr>
+                <p><strong>Question Number:</strong><br>${questionIndex}</p>
+                <p><strong>Persona:</strong><br>${JSON.stringify(entry.persona)}</p>
+                <p><strong>Raw Response:</strong><br>${response}</p>
+            `;
+
+            // Update the navigation div to include the new button
+            document.querySelector('.navigation').innerHTML = `
+                <button onclick="navigate(-1)"><<<-Previous</button>
+                <button onclick="navigate(1)">Next->>></button>
+                <button class="button rightbutton" onclick="switchSection('mainNavigator')">Back to Main</button>
+                <button class="button rightbutton" onclick="location.href='runs/${selectedKey}/ask_question_terminal.html'">View Terminal Output for This Run</button>
+            `;
+
+            // Update progress bar and text
+            const progressPercentage = ((currentIndex + 1) / currentDataSet.length) * 100;
+            document.getElementById('progress-bar').style.width = `${progressPercentage}%`;
+            document.getElementById('progress-text').innerText = `Entry ${currentIndex + 1} of ${currentDataSet.length}`;
+        }
+
+
+        function navigate(direction) {
+            currentIndex += direction;
+            if (currentIndex < 0) currentIndex = 0;
+            if (currentIndex >= currentDataSet.length) currentIndex = currentDataSet.length - 1;
+            displayEntry();
+        }
+        
+        function displayCharts() {
+            document.getElementById('valueBiasChart').innerHTML = `<hr><h3> Report Cards for ${selectedKey}</h3>`; // Clear previous charts
+
+            let personaCounts = ['50', '25', '5']; // Different persona counts to iterate over
+            
+            personaCounts.forEach(personaCount => {
+                document.getElementById('valueBiasChart').innerHTML += `
+                <button class="report-button" onclick="location.href='reports/report_${personaCount}_${selectedKey}.html'">View Full Report for ${selectedKey},<br>Prompted with ${personaCount} Personas</button>`;
+            });
+
+            document.getElementById('valueBiasChart').innerHTML += `<hr><h3> How did ${selectedKey} answer each question? </h3>`;
+            personaCounts.forEach(personaCount => {
+                ['1', '11', '21'].forEach(seed => {
+                    let key = `run_${personaCount}_${seed}_${selectedKey}`;
+                    if (dataSetsResponseCounts[key]) {
+                        let elementId = `chart_${personaCount}_${seed}_${selectedKey}`;
+                        let chartDiv = `<div id="${elementId}" style="width: 33%; float: left; "></div>`;
+                        document.getElementById('valueBiasChart').innerHTML += chartDiv;
+                        loadValueBiasChart(key, elementId);
+                    
+                    }
+                    
+                });
+                
+            });
+        }
+
+
+        function loadValueBiasChart(dataKey, elementId) {
+            let responseData = dataSetsResponseCounts[dataKey];
+            if (!responseData) {
+                console.error("No data found for key:", dataKey);
+                return;
+            }
+
+            // Sorting keys numerically
+            let questionIndices = Object.keys(responseData).map(Number).sort((a, b) => a - b);
+
+            let categoriesInfo = {
+                'A': { color: '#FF6384', label: 'Not like you at all' },
+                'B': { color: '#36A2EB', label: 'Not like you' },
+                'C': { color: '#FFCE56', label: 'A little like you' },
+                'D': { color: '#cc65fe', label: 'Moderately like you' },
+                'E': { color: '#ff9f40', label: 'Like you' },
+                'F': { color: '#4bc0c0', label: 'Very much like you' }
+            };
+
+            let traces = Object.keys(categoriesInfo).map(category => {
+                return {
+                    x: questionIndices.map(questionIndex => responseData[questionIndex][category] || 0),
+                    y: questionIndices,
+                    type: 'bar',
+                    orientation: 'h',
+                    name: categoriesInfo[category].label,
+                    marker: {
+                        color: categoriesInfo[category].color
+                    }
+                };
+            });
+
+            let layout = {
+                title: {
+                    text: `${dataKey.split('_')[1]} personas @ random seed ${dataKey.split('_')[2]}`,
+                    font: {
+                        family: 'Arial, sans-serif',
+                        size: 16
+                    }
+                },
+                barmode: 'stack',
+                xaxis: { title: 'Count' },
+                yaxis: {
+                    title: 'Question Index',
+                    automargin: true,
+                    tickvals: questionIndices,
+                    ticktext: questionIndices.map(index => `Q${index}`)
+                },
+                legend: {
+                    orientation: 'h',
+                    x: 0,
+                    y: 1.001,
+                    xanchor: 'left',
+                    yanchor: 'bottom'
+                },
+                margin: { l: 100, t: 150 },
+                width: 600, // Fixing the width of each chart
+                height: 1400  // You can adjust the height based on your requirements
+            };
+
+            Plotly.newPlot(elementId, traces, layout);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Toggle functionality
+            $('#toggleQuestionBox').click(function() {
+                $('#questionContent').toggle();  // Adjust this selector as needed
+                $(this).text($('#questionContent').is(':visible') ? 'Close' : 'View Questions');
+            });
+
+            // Populate the questions - adjust according to your actual data structure
+            const questionBox = document.getElementById('questionContent');
+            let content = ''; // Start with an empty string
+            for (const key in questionStatements) {
+                content += `<strong>Question ${key}:</strong> ${questionStatements[key]}<br>`;
+            }
+            questionBox.innerHTML = content;
+        });
+
+
+
+
+        populateDataSetSelector();
+        loadSelectedDataSet();
+        updateCharts('command-r-plus');
+    </script>
+</body>
+</html>

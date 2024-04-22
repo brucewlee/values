@@ -129,9 +129,9 @@
         <h4>In Progress</h4>
         <!-- <p><a href="#"><img src="accessibility/img/death-of-socrates.jpg" alt="The Death of Socrates"></a></p>-->
         <hr>
-        <!-- <button class="button" onclick="switchSection('mainFindings')">Summary of Main Findings</button>-->
         <button class="button" onclick="switchSection('valueBias')">Eliciting Latent Values with Role-Play</button>
-        <button class="button" onclick="switchSection('datasetViewer')">View Raw Response Results</button>
+        <button class="button" onclick="switchSection('datasetViewer')">View Raw Response Results for Role-Play</button>
+        <button class="button" onclick="switchSection('valueArgument')">Latent Values And Argument-Making</button>
         <hr>
     </div>
     <div id="questionBox">
@@ -163,9 +163,10 @@
     </div>
 
     <!-- Main Findings Section -->
-    <div id="mainFindings" class="section">
-        <h1>Main Findings</h1>
-        <p>This is a dummy section for Main Findings. Here you can display the results of your analysis or insights derived from the dataset.</p>
+    <div id="valueArgument" class="section">
+        <button class="report-button" onclick="location.href='reports/argument_report_anthropic.claude-3-sonnet-20240229-v1:0.html'">View Value Argument Report for anthropic.claude-3-sonnet-20240229-v1:0</button>
+        <button class="report-button" onclick="location.href='reports/argument_report_command-r-plus.html'">View Value Argument Report for command-r-plus</button>
+        <button class="report-button" onclick="location.href='reports/argument_report_gpt-3.5-turbo-0125.html'">View Value Argument Report for gpt-3.5-turbo-0125</button>
         <button class="button" onclick="switchSection('mainNavigator')">Back to Main</button>
     </div>
 

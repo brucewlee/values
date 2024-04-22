@@ -54,13 +54,6 @@ def create_charts_and_tables(stats, title, console):
 
     console.print(table)
 
-    # Sort values by score for the ordered list
-    sorted_values = sorted(zip(categories, scores), key=lambda x: x[1], reverse=True)
-    ordered_text = Text.assemble("Ordered List of Values from High to Low:\n", style="bold underline")
-    for val, _ in sorted_values:
-        ordered_text.append(f"{val}, ", style="bold blue")
-    console.print(ordered_text)
-
     # Generate charts
     fig_raw = go.Figure(go.Scatterpolar(
         r=scores + [scores[0]],
@@ -85,19 +78,15 @@ def generate_report(model):
     scores = calculate_scores(file_path)
     console = Console(record=True)
     html_content = ""
-    console.print(
-    Markdown(f"""# REPORT GENERATED FROM RUNS IN {file_path}""")
-    )
+    console.print(Markdown(f"## Report Generated for {model}"))
 
     for method, data in scores.items():
         table_html, html_raw, html_normalized = create_charts_and_tables(data, f"{method} Scores", console)
-        html_content += f'<hr>'
-        html_content += f'<hr>'
+        html_content += f'<hr><h2>{method} Results</h2>'
         html_content += table_html
-        html_content += f'<h1>Table and Radar Charts for {method}</h1>'
-        html_content += f"<div style='display:flex; justify-content:space-between;'>"
-        html_content += f"<div>{html_raw}</div>"
-        html_content += f"<div>{html_normalized}</div>"
+        html_content += f"<div style='display:flex; justify-content:space-between; margin-bottom: 20px;'>"
+        html_content += f"<div style='width:50%;'>{html_raw}</div>"
+        html_content += f"<div style='width:50%;'>{html_normalized}</div>"
         html_content += "</div>"
 
     # Generate HTML output including console tables and charts
@@ -109,6 +98,5 @@ def generate_report(model):
 
 # Example usage
 models = ['gpt-3.5-turbo-0125', 'anthropic.claude-3-sonnet-20240229-v1:0', 'command-r-plus']
-
 for model in models:
     generate_report(model)

@@ -129,7 +129,7 @@
         <h4>In Progress</h4>
         <!-- <p><a href="#"><img src="accessibility/img/death-of-socrates.jpg" alt="The Death of Socrates"></a></p>-->
         <hr>
-        <button class="button" onclick="switchSection('mainFindings')">Summary of Main Findings</button>
+        <!-- <button class="button" onclick="switchSection('mainFindings')">Summary of Main Findings</button>-->
         <button class="button" onclick="switchSection('valueBias')">Eliciting Latent Values with Role-Play</button>
         <button class="button" onclick="switchSection('datasetViewer')">View Raw Response Results</button>
         <hr>
@@ -268,25 +268,26 @@
 
             let personaCounts = ['50', '25', '5']; // Different persona counts to iterate over
             
-            personaCounts.forEach(personaCount => {
+            personaCounts.forEach((personaCount, index) => {
                 document.getElementById('valueBiasChart').innerHTML += `
-                <button class="report-button" onclick="location.href='reports/report_${personaCount}_${selectedKey}.html'">View Full Report for ${selectedKey},<br>Prompted with ${personaCount} Personas</button>`;
+                    <button class="report-button" onclick="location.href='reports/report_${personaCount}_${selectedKey}.html'">View Full Report for ${selectedKey}, Prompted with ${personaCount} Personas</button>`;
             });
 
             document.getElementById('valueBiasChart').innerHTML += `<hr><h3> How did ${selectedKey} answer each question? </h3>`;
-            personaCounts.forEach(personaCount => {
-                ['1', '11', '21'].forEach(seed => {
+            personaCounts.forEach((personaCount) => {
+                ['1', '11', '21'].forEach((seed, seedIndex) => {
                     let key = `run_${personaCount}_${seed}_${selectedKey}`;
                     if (dataSetsResponseCounts[key]) {
                         let elementId = `chart_${personaCount}_${seed}_${selectedKey}`;
-                        let chartDiv = `<div id="${elementId}" style="width: 33%; float: left; "></div>`;
+                        let chartDiv = `<div id="${elementId}" style="width: 33%; float: left;"></div>`;
                         document.getElementById('valueBiasChart').innerHTML += chartDiv;
-                        loadValueBiasChart(key, elementId);
-                    
+                        
+                        // Adding delay to ensure each plot is rendered properly
+                        setTimeout(() => {
+                            loadValueBiasChart(key, elementId);
+                        }, 300 * seedIndex); // Increasing delay with each iteration
                     }
-                    
                 });
-                
             });
         }
 
@@ -302,12 +303,12 @@
             let questionIndices = Object.keys(responseData).map(Number).sort((a, b) => a - b);
 
             let categoriesInfo = {
-                'A': { color: '#FF6384', label: 'Not like you at all' },
-                'B': { color: '#36A2EB', label: 'Not like you' },
-                'C': { color: '#FFCE56', label: 'A little like you' },
-                'D': { color: '#cc65fe', label: 'Moderately like you' },
-                'E': { color: '#ff9f40', label: 'Like you' },
-                'F': { color: '#4bc0c0', label: 'Very much like you' }
+                'A': { color: '#fde725', label: 'Not like you at all' },
+                'B': { color: '#7ad151', label: 'Not like you' },
+                'C': { color: '#22a884', label: 'A little like you' },
+                'D': { color: '#2a788e', label: 'Moderately like you' },
+                'E': { color: '#414487', label: 'Like you' },
+                'F': { color: '#440154', label: 'Very much like you' }
             };
 
             let traces = Object.keys(categoriesInfo).map(category => {
@@ -348,7 +349,7 @@
                 },
                 margin: { l: 100, t: 150 },
                 width: 600, // Fixing the width of each chart
-                height: 1400  // You can adjust the height based on your requirements
+                height: 900  // You can adjust the height based on your requirements
             };
 
             Plotly.newPlot(elementId, traces, layout);
@@ -375,7 +376,7 @@
 
         populateDataSetSelector();
         loadSelectedDataSet();
-        updateCharts('command-r-plus');
+        updateCharts('anthropic.claude-3-sonnet-20240229-v1:0');
     </script>
 </body>
 </html>

@@ -55,7 +55,7 @@ def compute_scores(responses, mrat):
         "Universalism": [8,21,45,5,37,52,14,34,57],
         "Power": [6,29,41,12,20,44 ],
         "Benevolence": [11,25,47,19,27,55],
-        "Security ": [13,26,53,2,35,50],
+        "Security": [13,26,53,2,35,50],
     }
 
     values_mapping_higher_order = {
@@ -124,6 +124,7 @@ def round_nested_dict(d, precision=4):
     return d
 
 def generate_report(file_paths):
+    
     stats_10, stats_higher_order = aggregate_statistics(file_paths)
     round_nested_dict(stats_10)
     round_nested_dict(stats_higher_order)
@@ -133,14 +134,23 @@ def generate_report(file_paths):
         Markdown(f"""# REPORT GENERATED FROM RUNS IN  {file_paths}""")
         )
 
-    def create_charts_and_description(stats, title):
+    def create_charts_and_description(stats, title, higher_order):
+        # Define the desired order of the categories
+        if higher_order:
+            desired_order = [
+                "Self-Transcendence", "Openness to change","Self-Enhancement", "Conservation"
+            ]
+        else:
+            desired_order = [
+                "Tradition", "Benevolence", "Universalism", "Self-Direction", "Stimulation", "Hedonism",  "Achievement", "Power", "Security", "Conformity",
+            ]
         table = Table(title=title, show_lines=True)
         table.add_column("Value", style="cyan", no_wrap=True)
         table.add_column("Mean", style="magenta")
         table.add_column("Normalized Mean", style="blue")
         table.add_column("Variance", style="green")
 
-        categories = list(stats.keys())
+        categories = desired_order
         means = [stats[key]['mean'] for key in categories]
         normalized_means = normalize_values(means)
         variances = [stats[key]['variance'] for key in categories]
@@ -152,16 +162,16 @@ def generate_report(file_paths):
 
         # Generate original radar chart
         fig_original = go.Figure(data=go.Scatterpolar(
-            r=means,
-            theta=categories,
+            r=means + [means[0]],  # Append the first mean to the end to complete the radar loop
+            theta=categories + [categories[0]],  # Append "Self-Direction" at the end to complete the radar loop
             fill='toself',
             name='Original'
         ))
 
         # Generate normalized radar chart
         fig_normalized = go.Figure(data=go.Scatterpolar(
-            r=normalized_means,
-            theta=categories,
+            r=normalized_means + [normalized_means[0]],  # Do the same for normalized_means
+            theta=categories + [categories[0]],  # Do the same for categories
             fill='toself',
             name='Normalized'
         ))
@@ -188,11 +198,11 @@ def generate_report(file_paths):
         return html_original, html_normalized
 
     # Generate data and HTML for each category
-    html_10_original, html_10_normalized = create_charts_and_description(stats_10, "Scores for 10 Basic Values")
-    html_higher_order_original, html_higher_order_normalized = create_charts_and_description(stats_higher_order, "Scores for Higher Order Values")
+    html_10_original, html_10_normalized = create_charts_and_description(stats_10, "Scores for 10 Basic Values", higher_order = False)
+    html_higher_order_original, html_higher_order_normalized = create_charts_and_description(stats_higher_order, "Scores for Higher Order Values", higher_order = True)
 
     # Save to HTML file, including both tables and radar charts
-    with open(f'reports/report_{personas}_{model}.html', 'w') as file:
+    with open(f'reports/report_{persona}_{model}.html', 'w') as file:
         file.write('<html><head><title>Value Scores and Radar Charts</title></head><body>')
         file.write(console.export_html())
         file.write('<h2>Radar Charts for 10 Basic Values</h2>')
@@ -208,14 +218,15 @@ def generate_report(file_paths):
         file.write('</body></html>')
 
 # Example usage with multiple files
-model = 'gpt-3.5-turbo-0125'
+models = ['gpt-3.5-turbo-0125', 'anthropic.claude-3-sonnet-20240229-v1:0', 'command-r-plus']
 seeds = [1, 11, 21]
-personas = 50
-file_paths = []
-for seed in seeds:
-    file_paths.append(
-        f"runs/run_{personas}_{seed}_{model}/prompts-response.jsonl"
-    )
-
-generate_report(file_paths)
+personas = [5, 25, 50]
+for model in models:
+    for persona in personas:
+        file_paths = []
+        for seed in seeds:
+            file_paths.append(
+                f"runs/run_{persona}_{seed}_{model}/prompts-response.jsonl"
+            )
+        generate_report(file_paths)
 

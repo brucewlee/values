@@ -3,7 +3,8 @@ __pycache__/
 *.py[cod]
 *$py.class
 *ask_question_terminal.html
-
+make_scenarios/
+webis-argvalues-22/
 # C extensions
 *.so
 api_keys.py

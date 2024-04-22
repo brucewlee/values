@@ -54,6 +54,13 @@ def create_charts_and_tables(stats, title, console):
 
     console.print(table)
 
+    # Create and print the ordered list of values based on scores
+    sorted_values = sorted(zip(categories, scores), key=lambda x: x[1], reverse=True)
+    ordered_text = Text.assemble("Ordered List of Values from High to Low:\n", style="bold underline")
+    for val, _ in sorted_values:
+        ordered_text.append(f"{val}, ", style="bold blue")
+    console.print(ordered_text)  # This will display the ordered list right after the table
+
     # Generate charts
     fig_raw = go.Figure(go.Scatterpolar(
         r=scores + [scores[0]],
